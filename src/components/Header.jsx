@@ -7,10 +7,10 @@ const Header = () => {
             {/* Left Side */}
             <div >
                 <h1 className='text-4xl xl:text-5xl 2xl:text-6xl font-bold text-neutral-700 leading-tight '>
-                    Remove the<br /><span className='bg-gradient-to-r from-blue-600 to to-fuchsia-500 bg-clip-text text-transparent'>Background</span> from <br />images for free.
+                    Remove the<br className='max:md:hidden'/><span className='bg-gradient-to-r from-blue-600 to to-fuchsia-500 bg-clip-text text-transparent'>Background</span> from <br className='max:md:hidden' />images for free.
                 </h1>
                 <p className='my-6 text-[-15px] text-gray-600 '>
-                    BG-Aipe is an AI tool for removing image backgrounds instantly and effortlessly.<br />It has been the web’s trusted background eraser since launch.
+                    BG-Aipe is an AI tool for removing image backgrounds instantly and effortlessly.<br className='max:sm:hidden'/>It has been the web’s trusted background eraser since launch.
 
                 </p>
 
