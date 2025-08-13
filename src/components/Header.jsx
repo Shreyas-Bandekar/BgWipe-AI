@@ -11,7 +11,6 @@ const Header = () => {
                 </h1>
                 <p className='my-6 text-[-15px] text-gray-600 '>
                     BG-Aipe is an AI tool for removing image backgrounds instantly and effortlessly.<br className='max:sm:hidden'/>It has been the web’s trusted background eraser since launch.
-
                 </p>
 
                 <div>
