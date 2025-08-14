@@ -1,4 +1,3 @@
-<div className='flex flex-col'></div>
 import { assets } from '../assets/assets.js'
 
 const Result = () => {
@@ -47,4 +46,4 @@ const Result = () => {
   )
 }
 
-export default Result
+export default Result;
