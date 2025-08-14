@@ -32,21 +32,21 @@ export const assets = {
 
 export const plans=[
     {
-        id: Basic,
+        id: "Basic",
         price: 10,
-        credit: 100,
+        credits: 100,
         desc: "Best for personal use"
     },
     {
-        id: Standard,
+        id: "Standard",
         price: 50,
-        credit: 300,
+        credits: 300,
         desc: "Best for small teams"
     },
     {
-        id: Premium,
+        id: "Premium",
         price: 100,
-        credit: 600,
+        credits: 600,
         desc: "Best for large teams"
     },
 ]
