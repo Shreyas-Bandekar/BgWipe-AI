@@ -15,7 +15,7 @@ app.use(express.json())
 app.use(cors())
 
 // Api routes
-app.get('/',(req,res)=>res.send("Api Working"))
+app.get('/', (res) => res.send("Api Working"))
 app.use('/api/user', userRouter)
 
 app.listen(port, () => {
