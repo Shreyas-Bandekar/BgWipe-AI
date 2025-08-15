@@ -1,12 +1,38 @@
-# React + Vite
+# 🖼️ BgWipe AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**BgWipe AI** is a MERN stack application that uses the **Clidrop API** to remove image backgrounds in seconds.  
+It features **Clerk authentication** for secure sign-in/sign-up and allows users to upload, process, and download images instantly.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
+- 🔐 **Authentication with Clerk**
+- 📤 Upload any image (JPG, PNG, etc.)
+- 🤖 AI-powered background removal via **Clidrop API**
+- 📥 Download processed images instantly
+- 📜 User history of processed images
+- 📱 Fully responsive UI (mobile & desktop)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+**Frontend**:
+- React (Vite)
+- Clerk Authentication
+- Axios
+- TailwindCSS (or custom CSS)
+
+**Backend**:
+- Node.js + Express
+- Multer (file uploads)
+- Axios (API requests)
+- CORS
+- dotenv
+- **Clidrop API**
+
+**Database**:
+- MongoDB (Mongoose)
+
+---
+
+## 📂 Project Structure
