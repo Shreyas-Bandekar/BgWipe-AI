@@ -4,24 +4,31 @@ import { Link } from 'react-router-dom'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 
 const Navbar = () => {
-
     const { openSignIn } = useClerk()
     const { isSignedIn } = useUser()
 
     return (
-        <div className='flex justify-between items-center mx-4 py-3 lg:mx-44'>
-            <Link to='/'><img src={assets.logo} alt="logo" className='w-32 sm:w-44' /></Link>
-            {
-                isSignedIn ? 
-                <div>
-                    <UserButton />
+        <nav className="w-full bg-white shadow-sm">
+            <div className="flex flex-wrap justify-between items-center mx-4 py-3 lg:mx-44">
+                <Link to="/" className="flex items-center gap-2">
+                    <img src={assets.logo_icon} alt="logo" className="w-7 sm:w-10" />
+                    <span className="text-lg font-bold text-zinc-800">BgWipe-AI</span>
+                </Link>
+                <div className="flex items-center gap-2">
+                    {isSignedIn ? (
+                        <UserButton />
+                    ) : (
+                        <button
+                            onClick={() => openSignIn({})}
+                            className="bg-zinc-800 text-white flex items-center gap-2 py-2 px-4 sm:px-8 sm:py-3 text-sm rounded-full transition hover:bg-zinc-700"
+                        >
+                            <span className="">Get Started</span>
+                            <img src={assets.arrow_icon} alt="arrow" className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
-                :<button onClick={() => openSignIn({})} className='bg-zinc-800 text-white flex item-center gap-1 py-2 px-4 sm:px-8 sm:py-3 text-sm rounded-full'>
-                    Get Started <img src={assets.arrow_icon} alt="arrow" />
-                </button>
-            }
-
-        </div>
+            </div>
+        </nav>
     )
 }
 
