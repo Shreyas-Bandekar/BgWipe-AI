@@ -1,4 +1,3 @@
-import logo from './logo.svg'
 import logo_icon from './logo_icon.svg'
 import arrow_icon from './arrow_icon.svg'
 import header_img from './header_img.png'
@@ -14,7 +13,6 @@ import twitter_icon from './twitter_icon.svg'
 import credit_icon from './credit_icon.png'
 
 export const assets = {
-    logo,
     logo_icon,
     arrow_icon,
     header_img,
