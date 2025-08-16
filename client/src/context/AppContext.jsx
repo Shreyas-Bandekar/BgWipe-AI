@@ -6,7 +6,7 @@ import {toast} from 'react-toastify';
 
 export const AppContext = createContext();
 
-const AppContextProvider = ({ props }) => {
+const AppContextProvider = ({ children }) => {
   
     const [credit, setCredit] = useState(false);
 
@@ -24,6 +24,7 @@ const AppContextProvider = ({ props }) => {
 
             if (data.success) {
                 setCredit(data.credit);
+                console.log(data.credit)
             }
         } catch (error) {
             toast.error(error.message);
@@ -36,7 +37,7 @@ const AppContextProvider = ({ props }) => {
 
     return (
         <AppContext.Provider value={value}>
-            {props.children}
+            {children}
         </AppContext.Provider>
     )
 }

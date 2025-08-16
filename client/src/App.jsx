@@ -4,7 +4,7 @@ import Result from './pages/Result'
 import BuyCredit from './pages/BuyCredit'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import 'react-toastify/dist/React-toastify.css'
+import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
   return (
