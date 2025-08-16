@@ -2,6 +2,7 @@ import React, { createContext } from 'react';
 import { useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
+import {toast} from 'react-toastify';
 
 export const AppContext = createContext();
 
@@ -25,12 +26,12 @@ const AppContextProvider = ({ props }) => {
                 setCredit(data.credit);
             }
         } catch (error) {
-            
+            toast.error(error.message);
         }
     };
 
     const value = {
-
+        credit,setCredit,loadCreditData,backendUrl
     }
 
     return (
