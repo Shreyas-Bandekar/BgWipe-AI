@@ -1,10 +1,10 @@
-const express = require('express');
-const { clerkWebHooks, userCredits } = require('../controllers/user.controller.js');
-const { default: authUser } = require('../middlewares/auth.middleware.js');
+import express from "express";
+import { clerkWebHooks, userCredits } from "../controllers/user.controller.js";
+import authUser from "../middlewares/auth.middleware.js";
 
 const userRouter = express.Router();
 
-userRouter.post('/webhooks', clerkWebHooks);
-userRouter.get('/credits', authUser, userCredits);
+userRouter.post("/webhooks", clerkWebHooks);
+userRouter.get("/credits", authUser, userCredits);
 
-module.exports = userRouter;
+export default userRouter;   // ✅ ESM default export

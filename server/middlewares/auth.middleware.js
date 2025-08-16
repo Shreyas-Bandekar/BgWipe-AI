@@ -1,5 +1,5 @@
 import { messageInRaw } from "svix";
-import jwt from jsonwebtoken
+import jwt from 'jsonwebtoken'
 
 const authUser = async (req, res, next) => {
     try {
