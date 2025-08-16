@@ -5,13 +5,13 @@ import Result from './pages/Result'
 import BuyCredit from './pages/BuyCredit'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-
+import 'react-toastify/dist/React-toastify.css'
 
 function App() {
   return (
     <div className="min-h-screen bg-slate-100 overflow-x-hidden">
+      <ToastContainer position='bottom-right' />
       <Navbar />
-     
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/result' element={<Result />} />
