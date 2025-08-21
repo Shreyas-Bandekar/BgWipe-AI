@@ -8,14 +8,13 @@ const clerkWebHooks = async (req, res) => {
     try {
         // Create a svix instance with clerk
         const payload = req.body.toString();
-        await wHook.verify(payload, {
+        await Webhook.verify(payload, {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"]
         });
 
         const { type, data } = JSON.parse(payload);
-
 
         switch (type) {
             case "user.created": {
