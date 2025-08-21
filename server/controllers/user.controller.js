@@ -7,15 +7,15 @@ import User from "../models/user.model.js" // Adjust the path if needed
 const clerkWebHooks = async (req, res) => {
     try {
         // Create a svix instance with clerk
-        const wHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-
-        await wHook.verify(JSON.stringify(req.body), {
+        const payload = req.body.toString();
+        await wHook.verify(payload, {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"]
-        })
+        });
 
-        const { type, data } = JSON.parse(req.body);
+        const { type, data } = JSON.parse(payload);
+
 
         switch (type) {
             case "user.created": {

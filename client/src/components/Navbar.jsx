@@ -2,16 +2,16 @@ import React, { useEffect,useContext } from 'react'
 import { assets } from '../assets/assets.js'
 import { Link } from 'react-router-dom'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
-import { AppContext } from '../context/AppContext.jsx'
+import AppContextProvider, { AppContext } from '../context/AppContext.jsx'
 
 const Navbar = () => {
     const { openSignIn } = useClerk()
     const { isSignedIn } = useUser()
-    const { credit, loadCreditData } = useContext(AppContext)
-    
+    const { credits, fetchCredits } = useContext(AppContext)
+
     useEffect(() => {
         if (isSignedIn) {
-            loadCreditData()
+            fetchCredits()
         }
     }, [isSignedIn])
 
