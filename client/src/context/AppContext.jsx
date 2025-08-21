@@ -1,42 +1,31 @@
-// src/context/AppContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
-export const AppContext = createContext();
+const AppContext = createContext();
 
-const AppContextProvider = ({ children }) => {
-  const { getToken } = useAuth();
-  const [credits, setCredits] = useState(null);
-  
-  const backendUrl = "http://localhost:8000"; // Define your backend URL
+export const AppProvider = ({ children }) => {
+  const [credits, setCredits] = useState(0);
 
-  const fetchCredits = async () => {
+  const loadCreditData = async () => {
     try {
-      const token = await getToken();
-      const {data} = await axios.get(backendUrl + '/api/user/credits',{headers:{Authorization: `Bearer ${token}`}})
-
-      if(data.success){
-        setCredits(data.credits);
-        console.log("Credits fetched successfully:", data.credits);
-      }
-
-    } catch (error) {
-      console.log("Error fetching credits:", error);
-      toast.error(error.message);
+      const res = await axios.get("http://localhost:8000/api/user/credits", {
+        withCredentials: true,
+      });
+      setCredits(res.data.credits);
+    } catch (err) {
+      console.error("Error fetching credits:", err);
     }
-  }; // Add missing closing brace
+  };
 
   useEffect(() => {
-    fetchCredits();
-  }, []); // Move useEffect inside component
+    loadCreditData();
+  }, []);
 
   return (
-    <AppContext.Provider value={{ credits, fetchCredits }}>
+    <AppContext.Provider value={{ credits, setCredits, loadCreditData }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-
-export default AppContextProvider;
+export default AppContext;
