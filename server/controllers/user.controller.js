@@ -61,5 +61,18 @@ const clerkWebhooks = async (req, res) => {
 
 }
 
+const usercredits = async (req, res) => {
 
-export { clerkWebhooks };
+    try {
+        const {clerkId} = req.body;
+        const userData = await User.findOne({ clerkId });
+        res.json({ credits: userData.creditsBalance });
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+
+}
+
+export { clerkWebhooks, usercredits };
