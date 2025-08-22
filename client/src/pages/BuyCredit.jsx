@@ -1,34 +1,41 @@
-import React from 'react'
-import { assets, plans } from '../assets/assets.js'
+import React, { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 
 const BuyCredit = () => {
+  const { credit } = useContext(AppContext);
+
   return (
-    <div className='min-h-[77vh] text-center pt-14 mb-10'>
-      <button className='border border-gray-400 px-10 py-2 rounded-full mb-6'>Our Plans</button>
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <div className="flex flex-col items-center justify-center w-full h-full">
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          Credits Information
+        </h1>
+        <p className="text-center text-gray-600 mt-2">
+          You have <span className="font-bold">{credit}</span> credits left
+        </p>
 
-      <h1 className="text-center 
-               text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 
-               mt-4 font-semibold 
-               bg-gradient-to-r from-gray-900 to-gray-400 bg-clip-text text-transparent 
-               mb-6 sm:mb-10">
-        Choose the plan that works for you
-      </h1>
-
-      <div className='flex flex-wrap justify-center gap-6 text-left'>
-        {plans.map((item, index) => (
-          <div className='bg-white drop-shadow-sm border rounded-lg py-12 px-8 px-gray-700 hover:scale-105 transition-all duration-500' key={index}>
-            <img width={40} src={assets.logo_icon} alt="" />
-            <p className='mt-3 font-semibold'>{item.id}</p>
-            <p className='text-sm'>{item.desc}</p>
-            <p className='mt-6'>
-              <span className='tex-3xl font-medium'>${item.price}</span>/{item.credits}
+        <div className="mt-10 p-6 bg-white rounded-lg shadow-lg max-w-md">
+          <h2 className="text-xl font-bold text-center text-gray-800 mb-4">
+            Free Usage Policy
+          </h2>
+          <p className="text-center text-gray-600 mb-4">
+            Every user gets one free background removal. After using your free removal,
+            you'll need credits for additional operations.
+          </p>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-center text-gray-700">
+              <span className="font-bold">How it works:</span>
             </p>
-            <button className='w-full bg-gray-800 text-white text-sm mt-8 rounded-md py-2.5 min-w-52'>Buy Now</button>
+            <ul className="list-disc pl-6 mt-2">
+              <li className="text-gray-600 mb-1">First background removal is free</li>
+              <li className="text-gray-600 mb-1">Each additional removal costs 1 credit</li>
+              <li className="text-gray-600">Initial account balance: 5 credits</li>
+            </ul>
           </div>
-        ))}
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BuyCredit
+export default BuyCredit;

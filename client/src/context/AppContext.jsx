@@ -64,6 +64,7 @@ const AppContextProvider = (props) => {
       if (!isSignedIn) {
         return openSignIn();
       }
+      // Credit check is now handled on the server side with free usage logic
       setImage(image);
       setResultImage(false);
 
@@ -72,17 +73,29 @@ const AppContextProvider = (props) => {
       const token = await getToken();
 
       const formData = new FormData();
-      image && formData.append("image", image);
+      image && formData.append("image", image); // Server expects 'image' field name
 
       const { data } = await axios.post(
         backendUrl + "/api/image/remove-bg",
         formData,
-        { headers: { token } }
+        { 
+          headers: { 
+            token,
+            "Content-Type": "multipart/form-data"
+          }
+        }
       );
+      
+      console.log("Background removal response:", data);
 
       if (data.success) {
         setResultImage(data.resultImage);
         data.creditBalance && setCredit(data.creditBalance);
+        
+        // Show different message if this was a free removal
+        if (data.freeUsed) {
+          toast.success("Free background removal used successfully!");
+        }
       } else {
         toast.error(data.message);
         data.creditBalance && setCredit(data.creditBalance);

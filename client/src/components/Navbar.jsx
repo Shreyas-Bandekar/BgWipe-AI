@@ -19,8 +19,9 @@ const Navbar = () => {
 
   return (
     <div className="flex items-center justify-between mx-4 py-3 lg:mx-44">
-      <Link to={"/"}>
-        <img className="w-32 sm:w-44" src={assets.logo} alt="" />
+      <Link to={"/"} className="flex items-center gap-2">
+        <img className="w-10 sm:w-12" src={assets.logo_icon} alt="BG-Wipe AI Logo" />
+        <p className="text-medium font-semibold text-gray-800">BG-Wipe AI</p>
       </Link>
       {isSignedIn ? (
         <div className="flex flex-wrap gap-2 sm:gap-3">

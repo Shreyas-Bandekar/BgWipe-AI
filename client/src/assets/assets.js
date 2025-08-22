@@ -27,24 +27,3 @@ export const assets = {
     upload_btn_icon,
     credit_icon
 }
-
-export const plans=[
-    {
-        id: "Basic",
-        price: 10,
-        credits: 100,
-        desc: "Best for personal use"
-    },
-    {
-        id: "Standard",
-        price: 50,
-        credits: 300,
-        desc: "Best for small teams"
-    },
-    {
-        id: "Premium",
-        price: 100,
-        credits: 600,
-        desc: "Best for large teams"
-    },
-]
