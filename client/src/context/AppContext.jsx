@@ -1,64 +1,116 @@
-import { createContext, useState, useEffect } from "react";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { createContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const AppContext = createContext();
+export const AppContext = createContext();
 
-export const AppProvider = ({ children }) => {
-  const [credits, setCredits] = useState(0);
-  const { getToken, isLoaded, isSignedIn } = useAuth();
-  const { user } = useUser();
-  
-  const loadCreditData = async () => {
-    if (!isLoaded || !isSignedIn || !user) {
-      console.log('User not loaded or not signed in');
-      return;
-    }
-    
+const AppContextProvider = (props) => {
+  const [credit, setCredit] = useState(0); // Initialize with 0 instead of false
+  const [image, setImage] = useState(false);
+  const [resultImage, setResultImage] = useState(false);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URI;
+  const navigate = useNavigate();
+
+  const { getToken } = useAuth();
+  const { isSignedIn } = useUser();
+  const { openSignIn } = useClerk();
+
+  const loadCreditsData = async () => {
     try {
-      console.log('Getting token from Clerk...');
-      // Try to get a JWT token
       const token = await getToken();
-      
+
       if (!token) {
-        console.error('Failed to get token from Clerk');
+        toast.error("Authentication token not found");
         return;
       }
-      
-      // Log the user ID for debugging
-      console.log('User ID:', user.id);
-      
-      console.log('Token obtained, making API request...');
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/credits`, {
+
+      const response = await axios.get(backendUrl + `/api/user/credits`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          'X-User-ID': user.id // Add user ID as a separate header
-        }
+          token: token,
+        },
       });
-      
-      console.log('Credits response:', res.data);
-      setCredits(res.data.creditBalance || 0);
-    } catch (err) {
-      console.error("Error fetching credits:", err);
-      console.error("Error details:", err.response?.data || err.message);
-      // Set default credits if there's an error
-      setCredits(0);
+
+      console.log("response :>> ", response);
+
+      if (response.data.success) {
+        setCredit(response.data.userCredits);
+      } else {
+        console.warn("Failed to load credits:", response.data.message);
+        setCredit(0);
+        toast.warning(response.data.message);
+      }
+    } catch (error) {
+      console.error("Credits error:", error);
+      setCredit(0);
+
+      // More specific error handling
+      if (error.response?.status === 404) {
+        toast.error(
+          "User account not found. Please ensure your account is properly set up."
+        );
+      } else if (error.response?.status === 401) {
+        toast.error("Authentication failed. Please try logging in again.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to load credits");
+      }
     }
   };
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
-      loadCreditData();
+  const removeBg = async (image) => {
+    try {
+      if (!isSignedIn) {
+        return openSignIn();
+      }
+      setImage(image);
+      setResultImage(false);
+
+      navigate("/result");
+
+      const token = await getToken();
+
+      const formData = new FormData();
+      image && formData.append("image", image);
+
+      const { data } = await axios.post(
+        backendUrl + "/api/image/remove-bg",
+        formData,
+        { headers: { token } }
+      );
+
+      if (data.success) {
+        setResultImage(data.resultImage);
+        data.creditBalance && setCredit(data.creditBalance);
+      } else {
+        toast.error(data.message);
+        data.creditBalance && setCredit(data.creditBalance);
+        if (data.creditBalance === 0) {
+          navigate("/buy");
+        }
+      }
+    } catch (error) {
+      console.log("error :>> ", error);
+      toast.error(error.message);
     }
-  }, [isLoaded, isSignedIn, user]);
+  };
 
-
+  const value = {
+    credit,
+    setCredit,
+    loadCreditsData,
+    backendUrl,
+    image,
+    setImage,
+    removeBg,
+    resultImage,
+    setResultImage,
+  };
 
   return (
-    <AppContext.Provider value={{ credits, setCredits, loadCreditData }}>
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );
 };
 
-export default AppContext;
+export default AppContextProvider;
