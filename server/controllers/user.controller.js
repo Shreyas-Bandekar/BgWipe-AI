@@ -26,7 +26,7 @@ const clerkWebhooks = async (req, res) => {
                     image: data.image_url,
                 }
 
-                await UserActivation.create(userData);
+                await User.create(userData);
                 res.json({});
                 break;
             }
@@ -64,13 +64,40 @@ const clerkWebhooks = async (req, res) => {
 const usercredits = async (req, res) => {
 
     try {
-        const {clerkId} = req.body;
-        const userData = await User.findOne({ clerkId });
-        res.json({ credits: userData.creditsBalance });
+        const clerkId = req.body.clerkId;
+        console.log('Looking up user with clerkId:', clerkId);
+        console.log('Request body:', req.body);
+        console.log('Request headers:', req.headers);
+        
+        if (!clerkId) {
+            console.error('No clerkId provided in request');
+            return res.status(400).json({ message: 'No user ID provided' });
+        }
+        
+        // Try to find the user
+        let userData = await User.findOne({ clerkId });
+        console.log('User data found:', userData ? 'Yes' : 'No');
+        
+        // If user not found, create a new user with default credits
+        if (!userData) {
+            console.log('Creating new user with clerkId:', clerkId);
+            userData = await User.create({
+                clerkId,
+                creditBalance: 10 // Default credits
+            });
+            console.log('New user created:', userData ? 'Yes' : 'No');
+        }
+        
+        if (!userData) {
+            return res.status(500).json({ message: 'Failed to find or create user' });
+        }
+        
+        console.log('Returning credit balance:', userData.creditBalance);
+        res.json({ creditBalance: userData.creditBalance || 0 });
 
     } catch (error) {
-        console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        console.error('Error in usercredits:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 
 }

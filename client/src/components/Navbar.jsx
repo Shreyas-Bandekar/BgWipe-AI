@@ -3,11 +3,10 @@ import { assets } from '../assets/assets.js'
 import { Link } from 'react-router-dom'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 import AppContext from '../context/AppContext.jsx'
-import { AppProvider } from '../context/AppContext.jsx'
 
 const Navbar = () => {
     const { openSignIn } = useClerk()
-    const { isSignedIn } = useUser()
+    const { isSignedIn, user } = useUser()
     const { credits, loadCreditData } = useContext(AppContext)
 
     useEffect(() => {
@@ -28,8 +27,9 @@ const Navbar = () => {
                         <div className='flex items-center gap-2 sm:gap-3'>
                             <button className='flex items-center gap-2 bg-blue-100 px-4 sm:px-7 py-1.5 sm:py-1.5 rounded-full hover:scale-105 transition-all duration-700 '>
                                 <img className='w-5' src={assets.credit_icon} alt="" />
-                                <p className='text-xs sm:text-sm font-medium text-gray-600'>Credits: {credits}</p>
+                                <p className='text-xs sm:text-sm font-medium text-gray-600'>Credits: {credits || 0}</p>
                             </button>
+                            <p className='text-gray-600 max-sm:hidden'>Hi, {user.fullName}</p>
                             <UserButton />
                         </div>
                     ) : (
