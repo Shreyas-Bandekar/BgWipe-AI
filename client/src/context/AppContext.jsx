@@ -8,7 +8,7 @@ export const AppProvider = ({ children }) => {
 
   const loadCreditData = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/user/credits", {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/credits`, {
         withCredentials: true,
       });
       setCredits(res.data.credits);
