@@ -10,8 +10,9 @@ const AppContextProvider = (props) => {
   const [credit, setCredit] = useState(0); // Initialize with 0 instead of false
   const [image, setImage] = useState(false);
   const [resultImage, setResultImage] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URI;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
   const { getToken } = useAuth();
@@ -21,10 +22,25 @@ const AppContextProvider = (props) => {
   const loadCreditsData = async () => {
     try {
       const token = await getToken();
+      console.log("Client token:", token ? "Token received" : "No token");
 
       if (!token) {
-        toast.error("Authentication token not found");
+        console.warn("No authentication token available");
+        toast.error("Please sign in to continue");
         return;
+      }
+
+      // Decode token to see its structure (for debugging)
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const decoded = JSON.parse(jsonPayload);
+        console.log("Client-side decoded token - sub:", decoded.sub, "exp:", new Date(decoded.exp * 1000));
+      } catch (decodeError) {
+        console.warn("Could not decode token on client:", decodeError);
       }
 
       const response = await axios.get(backendUrl + `/api/user/credits`, {
@@ -33,14 +49,21 @@ const AppContextProvider = (props) => {
         },
       });
 
-      console.log("response :>> ", response);
+      console.log("Credits response:", response.data);
 
       if (response.data.success) {
         setCredit(response.data.userCredits);
+        console.log("Credits loaded successfully:", response.data.userCredits);
+        // Only show toast if credits are low
+        if (response.data.userCredits <= 2 && response.data.userCredits > 0) {
+          toast.warning(`⚠️ Low credits: ${response.data.userCredits} remaining`);
+        } else if (response.data.userCredits === 0) {
+          toast.error("❌ No credits remaining. Please purchase more credits.");
+        }
       } else {
         console.warn("Failed to load credits:", response.data.message);
         setCredit(0);
-        toast.warning(response.data.message);
+        toast.error(response.data.message || "Failed to load credits");
       }
     } catch (error) {
       console.error("Credits error:", error);
@@ -48,11 +71,14 @@ const AppContextProvider = (props) => {
 
       // More specific error handling
       if (error.response?.status === 404) {
-        toast.error(
-          "User account not found. Please ensure your account is properly set up."
-        );
+        toast.error("User account not found. Creating account...");
+        // Retry once after a short delay to allow account creation
+        setTimeout(() => loadCreditsData(), 2000);
       } else if (error.response?.status === 401) {
         toast.error("Authentication failed. Please try logging in again.");
+        openSignIn();
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        toast.error("Network error. Please check your connection and try again.");
       } else {
         toast.error(error.response?.data?.message || "Failed to load credits");
       }
@@ -64,16 +90,34 @@ const AppContextProvider = (props) => {
       if (!isSignedIn) {
         return openSignIn();
       }
-      // Credit check is now handled on the server side with free usage logic
+
+      if (!image) {
+        toast.error("Please select an image first");
+        return;
+      }
+
+      // Validate file type
+      if (!image.type.startsWith('image/')) {
+        toast.error("Please select a valid image file");
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      if (image.size > 10 * 1024 * 1024) {
+        toast.error("Image size should be less than 10MB");
+        return;
+      }
+
       setImage(image);
       setResultImage(false);
+      setIsProcessing(true);
 
       navigate("/result");
 
       const token = await getToken();
 
       const formData = new FormData();
-      image && formData.append("image", image); // Server expects 'image' field name
+      formData.append("image", image); // Server expects 'image' field name
 
       const { data } = await axios.post(
         backendUrl + "/api/image/remove-bg",
@@ -90,24 +134,51 @@ const AppContextProvider = (props) => {
 
       if (data.success) {
         setResultImage(data.resultImage);
-        data.creditBalance && setCredit(data.creditBalance);
         
-        // Show different message if this was a free removal
+        // Always update credit balance from server response
+        if (data.creditBalance !== undefined) {
+          setCredit(data.creditBalance);
+          console.log("Updated credit balance:", data.creditBalance);
+        }
+        
+        // Show different message based on whether this was a free removal
         if (data.freeUsed) {
-          toast.success("Free background removal used successfully!");
+          toast.success("🎉 Free background removal used successfully!");
+        } else {
+          toast.success(`✨ Background removed successfully! Credits remaining: ${data.creditBalance}`);
         }
       } else {
-        toast.error(data.message);
-        data.creditBalance && setCredit(data.creditBalance);
-        if (data.creditBalance === 0) {
-          navigate("/buy");
+        toast.error(data.message || "Failed to remove background");
+        
+        // Update credit balance even on failure (in case credits were deducted)
+        if (data.creditBalance !== undefined) {
+          setCredit(data.creditBalance);
         }
+        
+        // Navigate back to home on error
+        navigate("/");
       }
     } catch (error) {
-      console.log("error :>> ", error);
-      toast.error(error.message);
+      console.error("Background removal error:", error);
+      
+      if (error.response?.status === 413) {
+        toast.error("Image file is too large. Please try a smaller image.");
+      } else if (error.response?.status === 429) {
+        toast.error("Too many requests. Please try again later.");
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        toast.error("Network error. Please check your connection and try again.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to remove background");
+      }
+      
+      // Navigate back to home on error
+      navigate("/");
+    } finally {
+      setIsProcessing(false);
     }
   };
+
+
 
   const value = {
     credit,
@@ -119,6 +190,7 @@ const AppContextProvider = (props) => {
     removeBg,
     resultImage,
     setResultImage,
+    isProcessing,
   };
 
   return (

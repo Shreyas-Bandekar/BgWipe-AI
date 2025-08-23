@@ -18,5 +18,62 @@
 
 .bg-layer {
     background-image: url('/bg_layer.png');
-    
+}
+
+/* Custom responsive breakpoint for extra small screens */
+@media (min-width: 475px) {
+  .xs\:block {
+    display: block;
+  }
+  .xs\:hidden {
+    display: none;
+  }
+}
+
+/* Navbar enhancements */
+.navbar-blur {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Smooth mobile menu animation */
+.mobile-menu-enter {
+  max-height: 0;
+  opacity: 0;
+}
+
+.mobile-menu-enter-active {
+  max-height: 400px;
+  opacity: 1;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.mobile-menu-exit {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.mobile-menu-exit-active {
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Logo glow effect */
+.logo-glow {
+  filter: drop-shadow(0 0 8px rgba(147, 51, 234, 0.3));
+}
+
+/* Credit badge pulse animation */
+@keyframes credit-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(147, 51, 234, 0);
+  }
+}
+
+.credit-pulse {
+  animation: credit-pulse 2s infinite;
 }

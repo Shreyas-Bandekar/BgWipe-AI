@@ -22,7 +22,7 @@ const clerkWebhooks = async (req, res) => {
           clerkId: data.id,
           email: data.email_addresses[0].email_address,
           firstName: data.first_name,
-          lastname: data.last_name,
+          lastName: data.last_name,
           photo: data.image_url,
         };
         await userModel.create(userData);
@@ -33,10 +33,10 @@ const clerkWebhooks = async (req, res) => {
         const userData = {
           email: data.email_addresses[0].email_address,
           firstName: data.first_name,
-          lastname: data.last_name,
+          lastName: data.last_name,
           photo: data.image_url,
         };
-        await userModel.findOneAndUpdate({ clerkId: data.id, userData });
+        await userModel.findOneAndUpdate({ clerkId: data.id }, userData);
         res.json({});
         break;
       }
@@ -57,8 +57,51 @@ const clerkWebhooks = async (req, res) => {
 // API Controller function to get user available credits data
 const userCredits = async (req, res) => {
   try {
-    const { clerkId } = req.body;
-    const userData = await userModel.findOne({ clerkId });
+    // For GET requests, clerkId is in req.user, for POST requests it's in req.body
+    const clerkId = req.user?.clerkId || req.body?.clerkId;
+    
+    if (!clerkId) {
+      return res.json({ success: false, message: "User ID not found" });
+    }
+    
+    let userData = await userModel.findOne({ clerkId });
+    
+    // If user doesn't exist, create them with default values
+    if (!userData) {
+      console.log("User not found in database, creating new user with clerkId:", clerkId);
+      
+      try {
+        // Generate a unique email to avoid conflicts
+        const timestamp = Date.now();
+        const uniqueEmail = `user_${clerkId}_${timestamp}@temp.com`;
+        
+        userData = await userModel.create({
+          clerkId: clerkId,
+          email: uniqueEmail,
+          firstName: "User",
+          lastName: "",
+          photo: "", // Now optional with default
+          creditBalance: 5, // Default credits
+          hasUsedFreeRemoval: false
+        });
+        
+        console.log("Created new user:", userData);
+      } catch (createError) {
+        console.log("Error creating user:", createError);
+        
+        // Check if it's a duplicate key error
+        if (createError.code === 11000) {
+          // Try to find the user again in case it was created by another request
+          userData = await userModel.findOne({ clerkId });
+          if (!userData) {
+            return res.json({ success: false, message: "User creation failed due to duplicate key" });
+          }
+        } else {
+          return res.json({ success: false, message: "Failed to create user account: " + createError.message });
+        }
+      }
+    }
+    
     console.log("userData :>> ", userData);
     res.json({ success: true, userCredits: userData.creditBalance });
   } catch (error) {
