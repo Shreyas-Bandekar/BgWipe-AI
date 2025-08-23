@@ -35,4 +35,3 @@ It features **Clerk authentication** for secure sign-in/sign-up and allows users
 
 ---
 
-## 📂 Project Structure
