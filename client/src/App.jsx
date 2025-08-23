@@ -9,8 +9,12 @@ import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-100 overflow-x-hidden">
-      <ToastContainer position='bottom-right' />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 overflow-x-hidden">
+      <ToastContainer 
+        position='bottom-right'
+        toastClassName="backdrop-blur-sm bg-white/90 border border-purple-200/50"
+        progressClassName="bg-gradient-to-r from-purple-600 to-pink-600"
+      />
       <Navbar />
         <Routes>
           <Route path='/' element={<Home />} />
