@@ -12,23 +12,33 @@ const app = express();
 let dbConnected = false;
 async function ensureDBConnected() {
   if (!dbConnected) {
-    await connectDB();
-    dbConnected = true;
+    try {
+      await connectDB();
+      dbConnected = true;
+      console.log('MongoDB connected successfully');
+    } catch (error) {
+      console.error('Failed to connect to MongoDB:', error);
+      throw error;
+    }
   }
 }
+
+// Initialize DB connection (but don't block)
+ensureDBConnected().catch(console.error);
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Ensure DB connection before each request
-app.use(async (req, res, next) => {
-  await ensureDBConnected();
-  next();
-});
-
 // Routes
-app.get("/", (req, res) => res.send("API is working"));
+app.get("/", async (req, res) => {
+  try {
+    await ensureDBConnected();
+    res.send("API is working");
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Database connection failed" });
+  }
+});
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
