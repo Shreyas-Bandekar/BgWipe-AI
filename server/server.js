@@ -31,14 +31,25 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
-app.get("/", async (req, res) => {
+app.get("/", (req, res) => {
+  console.log('Root route accessed - sending immediate response');
+  return res.json({ 
+    success: true, 
+    message: "API is working", 
+    timestamp: new Date().toISOString(),
+    dbStatus: dbConnected ? "connected" : "not connected"
+  });
+});
+
+// DB connection route
+app.get("/db-test", async (req, res) => {
   try {
-    console.log('Root route accessed');
+    console.log('DB test route accessed');
     await ensureDBConnected();
     console.log('DB connection ensured, sending response');
-    return res.json({ success: true, message: "API is working", timestamp: new Date().toISOString() });
+    return res.json({ success: true, message: "Database connected", timestamp: new Date().toISOString() });
   } catch (error) {
-    console.error('Error in root route:', error);
+    console.error('Error in DB test route:', error);
     return res.status(500).json({ success: false, message: "Database connection failed", error: error.message });
   }
 });
