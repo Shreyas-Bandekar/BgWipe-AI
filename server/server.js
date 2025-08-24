@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import useRouter from "./routes/userRoutes.js";
 import imageRouter from "./routes/imagesRoutes.js";
+import serverless from "serverless-http";
 
 // App Config
 const PORT = process.env.PORT || 4000;
@@ -20,3 +21,6 @@ app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
 app.listen(PORT, () => console.log("Server running on port: ", PORT));
+
+export const handler = serverless(app);
+export default handler;
