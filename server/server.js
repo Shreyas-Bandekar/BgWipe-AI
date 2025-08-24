@@ -20,6 +20,5 @@ app.get("/", (req, res) => res.send("API is working"));
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
-// Export for Vercel
-export const handler = serverless(app);
-export default handler;
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
