@@ -1,33 +1,57 @@
 
-export default function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import connectDB from "./config/db.js";
+import useRouter from "./routes/userRoutes.js";
+import imageRouter from "./routes/imagesRoutes.js";
+import serverless from "serverless-http";
 
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+const app = express();
 
-  // Handle different routes
-  if (req.url === '/' && req.method === 'GET') {
-    res.status(200).json({
-      success: true,
-      message: "API is working",
-      timestamp: new Date().toISOString()
-    });
-  } else if (req.url === '/health' && req.method === 'GET') {
-    res.status(200).json({
-      success: true,
-      message: "Server is running",
-      timestamp: new Date().toISOString()
-    });
-  } else {
-    res.status(404).json({
-      success: false,
-      message: "Route not found"
-    });
+let dbConnected = false;
+async function ensureDBConnected() {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      dbConnected = true;
+      console.log('MongoDB connected successfully');
+    } catch (error) {
+      console.error('Failed to connect to MongoDB:', error);
+      throw error;
+    }
   }
 }
+
+// Initialize DB connection (but don't block)
+ensureDBConnected().catch(console.error);
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Routes
+app.get("/", async (req, res) => {
+  try {
+    await ensureDBConnected();
+    res.json({ success: true, message: "API is working", timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Database connection failed", error: error.message });
+  }
+});
+
+app.get("/health", (req, res) => {
+  res.json({ success: true, message: "Server is running", timestamp: new Date().toISOString() });
+});
+
+app.use("/api/user", useRouter);
+app.use("/api/image", imageRouter);
+
+// ✅ Local dev only
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// ✅ Export for Vercel
+export default serverless(app);
