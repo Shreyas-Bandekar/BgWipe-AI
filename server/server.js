@@ -33,12 +33,22 @@ app.use(cors());
 // Routes
 app.get("/", async (req, res) => {
   try {
+    console.log('Root route accessed');
     await ensureDBConnected();
-    res.send("API is working");
+    console.log('DB connection ensured, sending response');
+    return res.json({ success: true, message: "API is working", timestamp: new Date().toISOString() });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Database connection failed" });
+    console.error('Error in root route:', error);
+    return res.status(500).json({ success: false, message: "Database connection failed", error: error.message });
   }
 });
+
+// Simple health check without DB
+app.get("/health", (req, res) => {
+  console.log('Health check accessed');
+  return res.json({ success: true, message: "Server is running", timestamp: new Date().toISOString() });
+});
+
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
