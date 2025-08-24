@@ -32,13 +32,24 @@ app.use(cors());
 
 // Routes
 app.get("/", (req, res) => {
-  console.log('Root route accessed - sending immediate response');
-  return res.json({ 
+  console.log('Root route hit');
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ 
     success: true, 
     message: "API is working", 
     timestamp: new Date().toISOString(),
     dbStatus: dbConnected ? "connected" : "not connected"
-  });
+  }));
+});
+
+app.get("/health", (req, res) => {
+  console.log('Health check hit');
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ 
+    success: true, 
+    message: "Server is running", 
+    timestamp: new Date().toISOString() 
+  }));
 });
 
 // DB connection route
@@ -47,17 +58,13 @@ app.get("/db-test", async (req, res) => {
     console.log('DB test route accessed');
     await ensureDBConnected();
     console.log('DB connection ensured, sending response');
-    return res.json({ success: true, message: "Database connected", timestamp: new Date().toISOString() });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, message: "Database connected", timestamp: new Date().toISOString() }));
   } catch (error) {
     console.error('Error in DB test route:', error);
-    return res.status(500).json({ success: false, message: "Database connection failed", error: error.message });
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, message: "Database connection failed", error: error.message }));
   }
-});
-
-// Simple health check without DB
-app.get("/health", (req, res) => {
-  console.log('Health check accessed');
-  return res.json({ success: true, message: "Server is running", timestamp: new Date().toISOString() });
 });
 
 app.use("/api/user", useRouter);
@@ -70,4 +77,5 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ✅ Export for Vercel
-export default serverless(app);
+const handler = serverless(app);
+export default handler;
