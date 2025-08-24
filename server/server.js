@@ -4,7 +4,6 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import useRouter from "./routes/userRoutes.js";
 import imageRouter from "./routes/imagesRoutes.js";
-import serverless from "serverless-http";
 
 const app = express();
 
@@ -57,11 +56,6 @@ app.get("/health", (req, res) => {
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
-// ✅ For Railway (normal Express server)
-if (process.env.RAILWAY_ENVIRONMENT) {
-  const PORT = process.env.PORT || 4000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-}
-
-// ✅ For Vercel (serverless)
-export default serverless(app);
+// ✅ Railway: listen on the assigned port
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
