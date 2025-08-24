@@ -1,37 +1,33 @@
 
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import serverless from "serverless-http";
+export default function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-const app = express();
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-
-// Simple test route
-app.get("/", (req, res) => {
-  res.status(200).json({ 
-    success: true, 
-    message: "API is working", 
-    timestamp: new Date().toISOString()
-  });
-});
-
-app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    success: true, 
-    message: "Server is running", 
-    timestamp: new Date().toISOString() 
-  });
-});
-
-// ✅ Local dev only
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 4000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  // Handle different routes
+  if (req.url === '/' && req.method === 'GET') {
+    res.status(200).json({
+      success: true,
+      message: "API is working",
+      timestamp: new Date().toISOString()
+    });
+  } else if (req.url === '/health' && req.method === 'GET') {
+    res.status(200).json({
+      success: true,
+      message: "Server is running",
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: "Route not found"
+    });
+  }
 }
-
-// ✅ Export for Vercel
-export default serverless(app);
