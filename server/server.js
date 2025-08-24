@@ -8,7 +8,7 @@ import serverless from "serverless-http";
 
 const app = express();
 
-// Connect DB
+// Connect to DB
 await connectDB();
 
 // Middleware
@@ -20,5 +20,11 @@ app.get("/", (req, res) => res.send("API is working"));
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ✅ Local dev only (will NOT run on Vercel)
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// ✅ Export for Vercel
+export const handler = serverless(app);
