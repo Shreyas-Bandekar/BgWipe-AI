@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -8,12 +9,23 @@ import serverless from "serverless-http";
 
 const app = express();
 
-// Connect to DB
-await connectDB();
+let dbConnected = false;
+async function ensureDBConnected() {
+  if (!dbConnected) {
+    await connectDB();
+    dbConnected = true;
+  }
+}
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+// Ensure DB connection before each request
+app.use(async (req, res, next) => {
+  await ensureDBConnected();
+  next();
+});
 
 // Routes
 app.get("/", (req, res) => res.send("API is working"));
@@ -27,4 +39,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ✅ Export for Vercel
-export const handler = serverless(app);
+export default serverless(app);
