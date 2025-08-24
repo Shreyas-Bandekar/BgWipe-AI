@@ -52,6 +52,13 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+app.get("/api/ping", (req, res) => {
+  res.json({
+    success: true,
+    message: "🎉 Backend is live and connected on Railway!",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.use("/api/user", useRouter);
 app.use("/api/image", imageRouter);
