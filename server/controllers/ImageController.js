@@ -23,7 +23,7 @@ const removeBgImage = async (req, res) => {
           firstName: "User",
           lastName: "",
           photo: "",
-          creditBalance: 5, // Default credits
+          creditBalance: 3, // Default credits
           hasUsedFreeRemoval: false
         });
         
@@ -193,7 +193,7 @@ const getUserHistory = async (req, res) => {
           firstName: "User",
           lastName: "",
           photo: "",
-          creditBalance: 5, // Default credits
+          creditBalance: 3, // Default credits
           hasUsedFreeRemoval: false
         });
         
