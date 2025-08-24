@@ -54,15 +54,24 @@ const removeBgImage = async (req, res) => {
     
     console.log("File received:", req.file);
     
-    const imagePath = req.file.path;
-    console.log("Image path:", imagePath);
+    let imageFile;
     
-    // Check if file exists
-    if (!fs.existsSync(imagePath)) {
-      return res.status(400).json({ success: false, message: "File not found on server" });
+    // Handle different storage types (memory vs disk)
+    if (process.env.NODE_ENV === 'production') {
+      // Memory storage - use buffer directly
+      imageFile = req.file.buffer;
+    } else {
+      // Disk storage - use file path
+      const imagePath = req.file.path;
+      console.log("Image path:", imagePath);
+      
+      // Check if file exists
+      if (!fs.existsSync(imagePath)) {
+        return res.status(400).json({ success: false, message: "File not found on server" });
+      }
+      
+      imageFile = fs.createReadStream(imagePath);
     }
-    
-    const imageFile = fs.createReadStream(imagePath);
 
     const formData = new FormData();
     formData.append("image_file", imageFile);
@@ -127,10 +136,12 @@ const removeBgImage = async (req, res) => {
       });
     }
 
-    // Clean up uploaded file
-    fs.unlink(imagePath, (err) => {
-      if (err) console.log("Error deleting temp file:", err);
-    });
+    // Clean up uploaded file (only for disk storage)
+    if (process.env.NODE_ENV !== 'production' && req.file.path) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.log("Error deleting temp file:", err);
+      });
+    }
 
   } catch (error) {
     console.log("Error in removeBgImage:", error);
