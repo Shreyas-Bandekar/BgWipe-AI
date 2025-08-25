@@ -17,9 +17,10 @@ connectDB().catch((err) => {
 app.use(express.json());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || "https://your-frontend.vercel.app"] // Replace with your actual Vercel frontend URL
+    ? ["https://bg-wipe-ai.vercel.app", process.env.FRONTEND_URL] // Your actual Vercel frontend URL
     : ['http://localhost:3000', 'http://localhost:5173'],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"],
   credentials: true
 }));
 
