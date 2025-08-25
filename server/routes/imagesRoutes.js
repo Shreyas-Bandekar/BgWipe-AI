@@ -5,7 +5,7 @@ import authUser from "../middlewares/auth.js";
 
 const imageRouter = express.Router();
 
-imageRouter.post(`/remove-bg`, upload.single("image"), authUser, removeBgImage);
+imageRouter.post(`/remove-bg`, upload.single("image_file"), authUser, removeBgImage);
 imageRouter.get(`/history`, authUser, getUserHistory);
 
 export default imageRouter;
