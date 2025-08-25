@@ -117,7 +117,7 @@ const AppContextProvider = (props) => {
       const token = await getToken();
 
       const formData = new FormData();
-      formData.append("image", image); // Server expects 'image' field name
+      formData.append("image_file", image); // Server expects 'image' field name
 
       const { data } = await axios.post(
         backendUrl + "/api/image/remove-bg",
