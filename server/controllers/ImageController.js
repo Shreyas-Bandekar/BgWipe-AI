@@ -94,18 +94,23 @@ const removeBgImage = async (req, res) => {
       status: "success",
     });
 
-    // Update user credits
+    // Update user credits and status
     let updatedCredit = user.creditBalance;
+    
     if (isFreeRemoval) {
+      // Mark free removal as used, credits remain the same
       await userModel.findByIdAndUpdate(user._id, { hasUsedFreeRemoval: true });
     } else {
-      updatedCredit -= 1;
+      // Deduct one credit for paid removal
+      updatedCredit = user.creditBalance - 1;
       await userModel.findByIdAndUpdate(user._id, { creditBalance: updatedCredit });
     }
 
     // Clean up local file if any
     if (process.env.NODE_ENV !== "production" && req.file.path) {
-      fs.unlink(req.file.path, (err) => err && console.log("Temp file deletion error:", err));
+      fs.unlink(req.file.path, (err) => {
+        // Silently handle cleanup errors
+      });
     }
 
     res.json({
@@ -134,7 +139,7 @@ const removeBgImage = async (req, res) => {
         });
       }
     } catch (historyError) {
-      console.log("Failed to save error history:", historyError);
+      // Silently handle history save error in production
     }
 
     const msg =
@@ -159,8 +164,6 @@ const getUserHistory = async (req, res) => {
     
     // If user doesn't exist, create them with default values
     if (!user) {
-      console.log("User not found in database during history request, creating new user with clerkId:", clerkId);
-      
       try {
         user = await userModel.create({
           clerkId: clerkId,
@@ -172,9 +175,7 @@ const getUserHistory = async (req, res) => {
           hasUsedFreeRemoval: false
         });
         
-        console.log("Created new user during history request:", user);
       } catch (createError) {
-        console.log("Error creating user during history request:", createError);
         return res.json({ success: false, message: "Failed to create user account" });
       }
     }
@@ -200,8 +201,7 @@ const getUserHistory = async (req, res) => {
       stats
     });
   } catch (error) {
-    console.log("Error in getUserHistory:", error);
-    res.json({ success: false, message: error.message });
+    res.json({ success: false, message: "Failed to fetch history" });
   }
 };
 

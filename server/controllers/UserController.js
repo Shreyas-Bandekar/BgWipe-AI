@@ -49,7 +49,6 @@ const clerkWebhooks = async (req, res) => {
         break;
     }
   } catch (error) {
-    console.log("error :>> ", error.message);
     res.json({ success: false, message: error.message });
   }
 };
@@ -68,8 +67,6 @@ const userCredits = async (req, res) => {
     
     // If user doesn't exist, create them with default values
     if (!userData) {
-      console.log("User not found in database, creating new user with clerkId:", clerkId);
-      
       try {
         // Generate a unique email to avoid conflicts
         const timestamp = Date.now();
@@ -85,10 +82,7 @@ const userCredits = async (req, res) => {
           hasUsedFreeRemoval: false
         });
         
-        console.log("Created new user:", userData);
       } catch (createError) {
-        console.log("Error creating user:", createError);
-        
         // Check if it's a duplicate key error
         if (createError.code === 11000) {
           // Try to find the user again in case it was created by another request
@@ -102,10 +96,8 @@ const userCredits = async (req, res) => {
       }
     }
     
-    console.log("userData :>> ", userData);
     res.json({ success: true, userCredits: userData.creditBalance });
   } catch (error) {
-    console.log("error :>> ", error.message);
     res.json({ success: false, message: error.message });
   }
 };

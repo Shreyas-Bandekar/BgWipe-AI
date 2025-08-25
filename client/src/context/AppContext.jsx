@@ -22,25 +22,10 @@ const AppContextProvider = (props) => {
   const loadCreditsData = async () => {
     try {
       const token = await getToken();
-      console.log("Client token:", token ? "Token received" : "No token");
 
       if (!token) {
-        console.warn("No authentication token available");
         toast.error("Please sign in to continue");
         return;
-      }
-
-      // Decode token to see its structure (for debugging)
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        const decoded = JSON.parse(jsonPayload);
-        console.log("Client-side decoded token - sub:", decoded.sub, "exp:", new Date(decoded.exp * 1000));
-      } catch (decodeError) {
-        console.warn("Could not decode token on client:", decodeError);
       }
 
       const response = await axios.get(backendUrl + `/api/user/credits`, {
@@ -53,26 +38,22 @@ const AppContextProvider = (props) => {
 
       if (response.data.success) {
         setCredit(response.data.userCredits);
-        console.log("Credits loaded successfully:", response.data.userCredits);
         // Only show toast if credits are low
-        if (response.data.userCredits <= 1 && response.data.userCredits > 0) {
+        if (response.data.userCredits <= 2 && response.data.userCredits > 0) {
           toast.warning(`⚠️ Low credits: ${response.data.userCredits} remaining`);
         } else if (response.data.userCredits === 0) {
           toast.error("❌ No credits remaining. Please purchase more credits.");
         }
       } else {
-        console.warn("Failed to load credits:", response.data.message);
         setCredit(0);
         toast.error(response.data.message || "Failed to load credits");
       }
     } catch (error) {
-      console.error("Credits error:", error);
       setCredit(0);
 
       // More specific error handling
       if (error.response?.status === 404) {
         toast.error("User account not found. Creating account...");
-        // Retry once after a short delay to allow account creation
         setTimeout(() => loadCreditsData(), 2000);
       } else if (error.response?.status === 401) {
         toast.error("Authentication failed. Please try logging in again.");
@@ -117,7 +98,7 @@ const AppContextProvider = (props) => {
       const token = await getToken();
 
       const formData = new FormData();
-      formData.append("image_file", image); // Server expects 'image' field name
+      formData.append("image_file", image);
 
       const { data } = await axios.post(
         backendUrl + "/api/image/remove-bg",
@@ -129,19 +110,16 @@ const AppContextProvider = (props) => {
           }
         }
       );
-      
-      console.log("Background removal response:", data);
 
       if (data.success) {
         setResultImage(data.resultImage);
         
-        // Always update credit balance from server response
+        // Update credit balance from server response
         if (data.creditBalance !== undefined) {
           setCredit(data.creditBalance);
-          console.log("Updated credit balance:", data.creditBalance);
         }
         
-        // Show different message based on whether this was a free removal
+        // Show success message
         if (data.freeUsed) {
           toast.success("🎉 Free background removal used successfully!");
         } else {
@@ -150,17 +128,14 @@ const AppContextProvider = (props) => {
       } else {
         toast.error(data.message || "Failed to remove background");
         
-        // Update credit balance even on failure (in case credits were deducted)
+        // Update credit balance even on failure
         if (data.creditBalance !== undefined) {
           setCredit(data.creditBalance);
         }
         
-        // Navigate back to home on error
         navigate("/");
       }
     } catch (error) {
-      console.error("Background removal error:", error);
-      
       if (error.response?.status === 413) {
         toast.error("Image file is too large. Please try a smaller image.");
       } else if (error.response?.status === 429) {
@@ -171,7 +146,6 @@ const AppContextProvider = (props) => {
         toast.error(error.response?.data?.message || "Failed to remove background");
       }
       
-      // Navigate back to home on error
       navigate("/");
     } finally {
       setIsProcessing(false);

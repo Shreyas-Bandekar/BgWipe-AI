@@ -5,8 +5,6 @@ const authUser = async (req, res, next) => {
   try {
     const { token } = req.headers;
 
-    console.log("Received token:", token ? "Token present" : "No token");
-
     if (!token) {
       return res.json({
         success: false,
@@ -16,12 +14,6 @@ const authUser = async (req, res, next) => {
 
     // Decode the JWT token without verification (since Clerk handles verification)
     const token_decode = jwt.decode(token);
-    console.log("Decoded token payload:", {
-      sub: token_decode?.sub,
-      exp: token_decode?.exp,
-      iat: token_decode?.iat,
-      iss: token_decode?.iss
-    });
     
     if (!token_decode) {
       return res.json({
@@ -48,8 +40,6 @@ const authUser = async (req, res, next) => {
       });
     }
 
-    console.log("Extracted clerkId:", clerkId);
-
     // For GET requests, we'll use req.user, for POST requests, we'll use req.body
     if (req.method === 'GET') {
       req.user = { clerkId };
@@ -63,8 +53,7 @@ const authUser = async (req, res, next) => {
     
     next();
   } catch (error) {
-    console.log("Auth middleware error:", error.message);
-    res.json({ success: false, message: "Authentication failed: " + error.message });
+    res.json({ success: false, message: "Authentication failed" });
   }
 };
 
