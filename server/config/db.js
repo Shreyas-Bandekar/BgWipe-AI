@@ -10,7 +10,7 @@ const connectDB = async () => {
             console.error('MongoDB connection error:', err);
         });
 
-        await mongoose.connect(`${process.env.MONGO_URI}/bgwipeai`, {
+        await mongoose.connect(process.env.MONGO_URI, {
             ssl: true,
             tls: true,
             tlsAllowInvalidCertificates: false,
