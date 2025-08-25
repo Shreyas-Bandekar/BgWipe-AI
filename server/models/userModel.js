@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     photo: { type: String, default: "" }, // Make photo optional with default empty string
     firstName: { type: String, default: "" },
     lastName: { type: String, default: "" },
-    creditBalance: { type: Number, default: 5 }, // Default 5 credits for each user
+    creditBalance: { type: Number, default: 3 }, // Default 3 credits for each user
     hasUsedFreeRemoval: { type: Boolean, default: false },
 });
 

@@ -55,7 +55,7 @@ const AppContextProvider = (props) => {
         setCredit(response.data.userCredits);
         console.log("Credits loaded successfully:", response.data.userCredits);
         // Only show toast if credits are low
-        if (response.data.userCredits <= 2 && response.data.userCredits > 0) {
+        if (response.data.userCredits <= 1 && response.data.userCredits > 0) {
           toast.warning(`⚠️ Low credits: ${response.data.userCredits} remaining`);
         } else if (response.data.userCredits === 0) {
           toast.error("❌ No credits remaining. Please purchase more credits.");
