@@ -1,4 +1,6 @@
 import axios from "axios";
+import fs from "fs";
+import FormData from "form-data";
 import userModel from "../models/userModel.js";
 import imageHistoryModel from "../models/imageHistoryModel.js";
 
@@ -7,9 +9,9 @@ const removeBgImage = async (req, res) => {
 
   try {
     const { clerkId } = req.body;
-
-    if (!clerkId) return res.status(400).json({ success: false, message: "User ID missing" });
-    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+    if (!clerkId) {
+      return res.status(400).json({ success: false, message: "User ID missing" });
+    }
 
     // Fetch or create user
     let user = await userModel.findOne({ clerkId });
@@ -26,19 +28,38 @@ const removeBgImage = async (req, res) => {
     }
 
     const isFreeRemoval = !user.hasUsedFreeRemoval;
+
     if (!isFreeRemoval && user.creditBalance <= 0) {
-      return res.json({ success: false, message: "No Credit Balance", creditBalance: user.creditBalance });
+      return res.status(400).json({
+        success: false,
+        message: "No Credit Balance",
+        creditBalance: user.creditBalance,
+      });
     }
 
-    // Log file info
-    console.log("File received:", req.file.originalname, "size:", req.file.size);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
 
-    // Prepare FormData
+    // Prepare FormData for ClipDrop
     const formData = new FormData();
-    formData.append("image_file", req.file.buffer, req.file.originalname);
 
-    console.log("Sending request to ClipDrop API...");
+    if (process.env.NODE_ENV === "production") {
+      // Memory storage for Render: use buffer + filename + contentType
+      formData.append("image_file", req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+    } else {
+      // Local development: use file stream
+      const imagePath = req.file.path;
+      if (!fs.existsSync(imagePath)) {
+        return res.status(400).json({ success: false, message: "File not found on server" });
+      }
+      formData.append("image_file", fs.createReadStream(imagePath), req.file.originalname);
+    }
 
+    // Call ClipDrop API
     const { data, headers } = await axios.post(
       "https://clipdrop-api.co/remove-background/v1",
       formData,
@@ -51,10 +72,9 @@ const removeBgImage = async (req, res) => {
       }
     );
 
-    // Handle JSON error from ClipDrop
+    // If ClipDrop returns JSON (error)
     if (headers["content-type"]?.includes("application/json")) {
       const errorJson = JSON.parse(Buffer.from(data, "binary").toString("utf-8"));
-      console.log("ClipDrop API returned JSON error:", errorJson);
       return res.status(400).json({ success: false, message: errorJson.error || "ClipDrop API error" });
     }
 
@@ -76,13 +96,17 @@ const removeBgImage = async (req, res) => {
 
     // Update user credits
     let updatedCredit = user.creditBalance;
-    if (isFreeRemoval) await userModel.findByIdAndUpdate(user._id, { hasUsedFreeRemoval: true });
-    else {
+    if (isFreeRemoval) {
+      await userModel.findByIdAndUpdate(user._id, { hasUsedFreeRemoval: true });
+    } else {
       updatedCredit -= 1;
       await userModel.findByIdAndUpdate(user._id, { creditBalance: updatedCredit });
     }
 
-    console.log("Background removal successful:", req.file.originalname);
+    // Clean up local file if any
+    if (process.env.NODE_ENV !== "production" && req.file.path) {
+      fs.unlink(req.file.path, (err) => err && console.log("Temp file deletion error:", err));
+    }
 
     res.json({
       success: true,
@@ -92,13 +116,12 @@ const removeBgImage = async (req, res) => {
       message: isFreeRemoval ? "Background Removed (Free)" : "Background Removed",
       processingTime,
     });
-
   } catch (error) {
-    console.log("Error in removeBgImage:", error);
+    console.error("Error in removeBgImage:", error);
 
-    // Save failed history
+    // Save failed attempt if possible
     try {
-      const user = await userModel.findOne({ clerkId: req.body.clerkId });
+      const user = await userModel.findOne({ clerkId: req.body?.clerkId });
       if (user && req.file) {
         await imageHistoryModel.create({
           userId: user._id,
@@ -111,10 +134,13 @@ const removeBgImage = async (req, res) => {
         });
       }
     } catch (historyError) {
-      console.log("Failed history save error:", historyError);
+      console.log("Failed to save error history:", historyError);
     }
 
-    const msg = error.response?.data?.error || error.message || "Unknown error during background removal";
+    const msg =
+      error.response?.data?.error ||
+      error.message ||
+      "Unknown error during background removal";
     res.status(500).json({ success: false, message: msg });
   }
 };
