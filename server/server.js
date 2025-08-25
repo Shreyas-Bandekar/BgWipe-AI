@@ -21,7 +21,7 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "🎉 API is live on Railway!",
+    message: "🎉 API is live on Render!",
     timestamp: new Date().toISOString(),
   });
 });
