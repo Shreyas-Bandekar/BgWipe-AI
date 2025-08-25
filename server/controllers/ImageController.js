@@ -4,8 +4,6 @@ import FormData from "form-data";
 import userModel from "../models/userModel.js";
 import imageHistoryModel from "../models/imageHistoryModel.js";
 
-import axios from "axios";
-
 const removeBgImage = async (req, res) => {
   try {
     if (!req.file) {
