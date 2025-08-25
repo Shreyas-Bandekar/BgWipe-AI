@@ -15,7 +15,11 @@ connectDB().catch((err) => {
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ["https://bg-wipe-ai.vercel.app"], // allow your frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 // Routes
 app.get("/", (req, res) => {
