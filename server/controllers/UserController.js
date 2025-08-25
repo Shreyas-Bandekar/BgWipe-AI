@@ -81,7 +81,7 @@ const userCredits = async (req, res) => {
           firstName: "User",
           lastName: "",
           photo: "", // Now optional with default
-          creditBalance: 5, // Default credits
+          creditBalance: 2, // Default credits
           hasUsedFreeRemoval: false
         });
         

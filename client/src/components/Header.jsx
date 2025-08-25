@@ -56,8 +56,8 @@ const Header = () => {
                 </svg>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-800">1 Free Image</p>
-                <p className="text-xs text-gray-600">Try without signup</p>
+                <p className="text-xs font-semibold text-gray-800">2 Free Image</p>
+                <p className="text-xs text-gray-600">Try after signup</p>
               </div>
             </div>
             
